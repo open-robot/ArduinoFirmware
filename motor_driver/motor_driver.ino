@@ -30,7 +30,7 @@ Free Software Foundation, Inc.,
 #endif
 
 /****************************************************************************/
-//#define USE_MPU 1
+//#define USE_MPU
 
 /*********************************choose motor*******************************/
 #define MOTOR_370_333RPM
@@ -85,11 +85,6 @@ Servo myservo;  // create servo object to control a servo
 #define debug_println(x)
 #define debug_print_hex(x)
 #endif
-
-#ifndef _WATCHDOG_
-#define _WATCHDOG_
-#endif
-
 
 #ifdef USE_MPU
 #define MPU_INT  36
@@ -319,43 +314,6 @@ void pack_message_and_send(void* data, msg_type type, BYTE sub_type=0){
 
 }
 
-void timer8() {
-    timer_timer++;
-    if (timer_timer >= 4) {
-        count_timer2 ++;
-        if (count_timer2 > 100) {
-            flagBattery = true;
-            count_timer2 = 0;
-            flagOdomSpeed = true;
-            flagDmpWrite = true;
-        }
-        else {
-            flagOdomSpeed = true;
-            flagDmpWrite = true;
-        }
-        timer_timer = 0;
-    }
-    ang[0] = velocity_calculate(&omni_wheel[0]);
-    ang[1] = velocity_calculate(&omni_wheel[1]);
-    ang[2] = velocity_calculate(&omni_wheel[2]);
-    /*Serial.print("ang[]");
-    Serial.println(ang[0]);
-    Serial.println(ang[1]);
-    Serial.println(ang[2]);*/
-    omni_wheel[0].count = 0;
-    omni_wheel[1].count = 0;
-    omni_wheel[2].count = 0;
-    if(pidflag) {
-        PID_controller(speed_motor.v_motor1, &Input_1, &Setpoint_1, &Output_1, &Output_1_last,  MOTOR1_A, MOTOR1_B, &ang[0]);
-        PID_controller(speed_motor.v_motor2, &Input_2, &Setpoint_2, &Output_2, &Output_2_last,  MOTOR2_A, MOTOR2_B, &ang[1]);
-        PID_controller(speed_motor.v_motor3, &Input_3, &Setpoint_3, &Output_3, &Output_3_last,  MOTOR3_A, MOTOR3_B, &ang[2]);
-    }
-    /* Serial.print("setpoint");
-    Serial.println(speed_motor.v_motor1);
-    Serial.println(speed_motor.v_motor2);
-    Serial.println(speed_motor.v_motor3);*/
-}
-
 double interg;
 double lastInput;
 void PID_controller(float v_motor, double * Input, double * Setpoint, double * Output, double * Output_last, int MotorPin_A, int MotorPin_B, float * ang) {
@@ -397,6 +355,43 @@ void PID_controller(float v_motor, double * Input, double * Setpoint, double * O
     analogWrite(MotorPin_B, HIGH);
     *ang = 0;
     }
+}
+
+void timer8() {
+    timer_timer++;
+    if (timer_timer >= 4) {
+        count_timer2 ++;
+        if (count_timer2 > 100) {
+            flagBattery = true;
+            count_timer2 = 0;
+            flagOdomSpeed = true;
+            flagDmpWrite = true;
+        }
+        else {
+            flagOdomSpeed = true;
+            flagDmpWrite = true;
+        }
+        timer_timer = 0;
+    }
+    ang[0] = velocity_calculate(&omni_wheel[0]);
+    ang[1] = velocity_calculate(&omni_wheel[1]);
+    ang[2] = velocity_calculate(&omni_wheel[2]);
+    /*Serial.print("ang[]");
+    Serial.println(ang[0]);
+    Serial.println(ang[1]);
+    Serial.println(ang[2]);*/
+    omni_wheel[0].count = 0;
+    omni_wheel[1].count = 0;
+    omni_wheel[2].count = 0;
+    if(pidflag) {
+        PID_controller(speed_motor.v_motor1, &Input_1, &Setpoint_1, &Output_1, &Output_1_last,  MOTOR1_A, MOTOR1_B, &ang[0]);
+        PID_controller(speed_motor.v_motor2, &Input_2, &Setpoint_2, &Output_2, &Output_2_last,  MOTOR2_A, MOTOR2_B, &ang[1]);
+        PID_controller(speed_motor.v_motor3, &Input_3, &Setpoint_3, &Output_3, &Output_3_last,  MOTOR3_A, MOTOR3_B, &ang[2]);
+    }
+    /* Serial.print("setpoint");
+    Serial.println(speed_motor.v_motor1);
+    Serial.println(speed_motor.v_motor2);
+    Serial.println(speed_motor.v_motor3);*/
 }
 
 #ifdef USE_MPU
@@ -601,10 +596,10 @@ void loop() {
     int k = 0;
     BYTE aa = 0;
 
-    //#ifdef _WATCHDOG_
+    #ifdef _WATCHDOG_
     //  Watchdog reset
     watchdogReset();
-    //#endif
+    #endif
     if (stringComplete) {
         aa = 0;
         for (k = 0; k < 20; k++) {
