@@ -263,6 +263,7 @@ float velocity_calculate(Wheel *omni) {
   //ang = float(250.00 * (count) / float(5.50 * float(intervalTime_timer3 / 1000.00)));
   //formula:ang = (count/1320)*1000*60/(1320*20));
   ang = float(omni->count * ROTATE_SPEED);
+  //debug_println(ang);
   if (omni->dir == 1) {
     ang = -ang;
   }
@@ -358,7 +359,6 @@ void PID_controller(float v_motor, double * Input, double * Setpoint, double * O
   else {
     analogWrite(MotorPin_A, HIGH);
     analogWrite(MotorPin_B, HIGH);
-    *ang = 0;
   }
 }
 
@@ -387,9 +387,6 @@ void timer8() {
     debug_println(ang[1]);
     debug_println(ang[2]);
   */
-  omni_wheel[0].count = 0;
-  omni_wheel[1].count = 0;
-  omni_wheel[2].count = 0;
   if (pidflag) {
     PID_controller(speed_motor.v_motor1, &Input_1, &Setpoint_1, &Output_1, &Output_1_last,  MOTOR1_A, MOTOR1_B, &ang[0]);
     PID_controller(speed_motor.v_motor2, &Input_2, &Setpoint_2, &Output_2, &Output_2_last,  MOTOR2_A, MOTOR2_B, &ang[1]);
@@ -646,12 +643,14 @@ void loop() {
     odomData.odom_motor2 = omni_wheel[1].counter;
     odomData.odom_motor3 = omni_wheel[2].counter;
 #ifdef DEBUG
+
     debug_print("Odom: ");
     debug_print(odomData.odom_motor1);
     debug_print("  ");
     debug_print(odomData.odom_motor2);
     debug_print("  ");
     debug_println(odomData.odom_motor3);
+
 #endif
     pack_message_and_send(&odomData, MSG_ODOM);
 
@@ -659,12 +658,14 @@ void loop() {
     speedData.v_motor2 = ang[1];
     speedData.v_motor3 = ang[2];
 #ifdef DEBUG
+
     debug_print("Velocity: ");
     debug_print(speedData.v_motor1);
     debug_print("  ");
     debug_print(speedData.v_motor2);
     debug_print("  ");
     debug_println(speedData.v_motor3);
+
 #endif
     pack_message_and_send(&speedData, MSG_SPEED);
 
