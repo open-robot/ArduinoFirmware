@@ -77,7 +77,7 @@
 Servo myservo;  // create servo object to control a servo
 #endif
 
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
 #define debug_print(x) Serial.print(x)
